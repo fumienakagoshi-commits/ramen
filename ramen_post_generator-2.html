@@ -49,7 +49,6 @@
     padding: 11px 12px;
     outline: none;
   }
-  /* ファイル選択ボタン：label要素でinputをラップ */
   .upload-btn {
     display: block;
     width: 100%;
@@ -67,16 +66,9 @@
   .upload-btn:active { background: #2a2a2a; }
   .upload-btn input { display: none; }
   .upload-btn.loaded { color: #aaa; border-color: #555; border-style: solid; }
-
-  .status {
-    font-size: 11px;
-    color: #555;
-    text-align: center;
-    min-height: 16px;
-  }
+  .status { font-size: 11px; color: #555; text-align: center; min-height: 16px; }
   .status.ok { color: #4caf50; }
   .status.err { color: #f44336; }
-
   .dl-btn {
     display: block;
     background: #fff;
@@ -91,13 +83,8 @@
     text-decoration: none;
     cursor: pointer;
   }
-  .dl-btn.disabled {
-    background: #1e1e1e;
-    color: #3a3a3a;
-    pointer-events: none;
-  }
+  .dl-btn.disabled { background: #1e1e1e; color: #3a3a3a; pointer-events: none; }
   .hint { font-size: 10px; color: #444; text-align: center; }
-
   .preview-wrap { width: 100%; max-width: 420px; }
   #previewCanvas { width: 100%; border-radius: 6px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); display: none; }
   .preview-placeholder {
@@ -119,7 +106,6 @@
 <h1>Ramen Post Generator</h1>
 
 <div class="panel">
-
   <div class="field">
     <label>画像（Border加工済み・4:5）</label>
     <label class="upload-btn" id="uploadBtn">
@@ -128,25 +114,20 @@
     </label>
     <div class="status" id="status"></div>
   </div>
-
   <div class="field">
     <label>ラーメン名（上部中央・空欄OK）</label>
     <input type="text" id="ramenName" placeholder="魚介豚骨つけ麺（並）">
   </div>
-
   <div class="field">
     <label>店名（下部右寄せ）</label>
     <input type="text" id="shopName" placeholder="麺処 さくら">
   </div>
-
   <div class="field">
     <label>住所・最寄り駅（最下部）</label>
     <input type="text" id="location" placeholder="東京都新宿区（新宿駅）">
   </div>
-
   <a id="dlBtn" class="dl-btn disabled">画像をアップロードしてください</a>
   <p class="hint" id="hint" style="display:none">※スマホは画像を長押し→保存 でもOK</p>
-
 </div>
 
 <div class="preview-wrap">
@@ -171,12 +152,8 @@
 
   fileInput.addEventListener('change', function() {
     const file = this.files[0];
-    if (!file) {
-      setStatus('ファイルが選択されていません', 'err');
-      return;
-    }
+    if (!file) { setStatus('ファイルが選択されていません', 'err'); return; }
     setStatus('読み込み中...', '');
-
     const reader = new FileReader();
     reader.onerror = () => setStatus('読み込みエラー', 'err');
     reader.onload = function(e) {
@@ -218,6 +195,17 @@
     return borderH;
   }
 
+  // 文字幅を測って自動縮小するフォントサイズ計算
+  function fitFontSize(text, maxWidth, baseFontSize, minFontSize, weight) {
+    let fs = baseFontSize;
+    ctx.font = `${weight} ${fs}px 'Noto Sans JP', sans-serif`;
+    while (ctx.measureText(text).width > maxWidth && fs > minFontSize) {
+      fs -= 1;
+      ctx.font = `${weight} ${fs}px 'Noto Sans JP', sans-serif`;
+    }
+    return fs;
+  }
+
   function render() {
     if (!loadedImg) return;
     const W = loadedImg.naturalWidth;
@@ -229,10 +217,14 @@
 
     const borderH = detectBorderHeight(W, H);
     const PAD = W * 0.025;
+    const maxTextW = W * 0.88; // 左右に6%ずつ余白
 
+    // ラーメン名 — 自動縮小・中央寄せ
     const ramen = ramenName.value.trim();
     if (ramen) {
-      const fs = Math.round(W * 0.052);
+      const baseFs = Math.round(W * 0.052);
+      const minFs  = Math.round(W * 0.028);
+      const fs = fitFontSize(ramen, maxTextW, baseFs, minFs, '400');
       ctx.font = `400 ${fs}px 'Noto Sans JP', sans-serif`;
       ctx.fillStyle = '#111111';
       ctx.textAlign = 'center';
