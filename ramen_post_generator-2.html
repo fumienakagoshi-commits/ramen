@@ -241,7 +241,8 @@
 
     const shop = shopName.value.trim();
     if (shop) {
-      ctx.font = `400 ${shopFs}px 'Noto Sans JP', sans-serif`;
+      const fittedShopFs = fitFontSize(shop, W - PAD * 2, shopFs, Math.round(W * 0.028), '400');
+      ctx.font = `400 ${fittedShopFs}px 'Noto Sans JP', sans-serif`;
       ctx.fillStyle = '#111111';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
